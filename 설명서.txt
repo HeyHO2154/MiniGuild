@@ -1,0 +1,7 @@
+cd Backend
+npm init -y  # package.json 생성
+npm install ws  # WebSocket 서버용
+
+cd Frontend
+npm init -y  # package.json 생성
+npm install express  # 정적 파일 서버용
