@@ -4,7 +4,4 @@ const app = express();
 
 app.use(express.static(path.join(__dirname)));
 
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`Frontend server running on http://localhost:${PORT}`);
-}); 
+app.listen(3000);
