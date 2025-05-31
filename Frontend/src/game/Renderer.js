@@ -1,7 +1,8 @@
 export class Renderer {
-    constructor(canvas) {
+    constructor(canvas, camera) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
+        this.camera = camera;
         this.setupCanvas();
     }
 
@@ -10,8 +11,14 @@ export class Renderer {
         this.canvas.height = window.innerHeight;
         
         window.addEventListener('resize', () => {
+            const widthDiff = window.innerWidth - this.canvas.width;
+            const heightDiff = window.innerHeight - this.canvas.height;
+            
             this.canvas.width = window.innerWidth;
             this.canvas.height = window.innerHeight;
+            
+            this.camera.x -= widthDiff / 2;
+            this.camera.y -= heightDiff / 2;
         });
     }
 

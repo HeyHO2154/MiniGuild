@@ -5,7 +5,8 @@ import { PlayerController } from './PlayerController.js';
 
 export class Game {
     constructor() {
-        this.renderer = new Renderer(document.getElementById('gameCanvas'));
+        this.camera = { x: 0, y: 0 };
+        this.renderer = new Renderer(document.getElementById('gameCanvas'), this.camera);
         this.networkManager = new NetworkManager(
             this.handleInit.bind(this),
             this.handleGameState.bind(this)
@@ -16,7 +17,6 @@ export class Game {
 
         this.players = new Map();
         this.playerId = null;
-        this.camera = { x: 0, y: 0 };
         this.mapSize = { width: 0, height: 0 };
         
         this.playerController = new PlayerController(this);
