@@ -8,6 +8,13 @@ const game = new Game();
 // 게임 시작
 game.start();
 
+// 메인 게임 루프
+const TICK_RATE = 60;
+setInterval(() => {
+    game.update();  // AI 업데이트
+    broadcastGameState();  // 상태 브로드캐스트
+}, 1000 / TICK_RATE);  // 60fps
+
 // 게임 상태 브로드캐스트 함수
 function broadcastGameState() {
     const gameStateMessage = {
@@ -22,12 +29,8 @@ function broadcastGameState() {
     });
 }
 
-// 주기적으로 게임 상태 브로드캐스트
-setInterval(broadcastGameState, 1000 / 60);  // 60fps
-
 server.on('connection', (ws) => {
     const playerId = Date.now().toString();
-    console.log('플레이어 연결:', playerId);
     
     ws.on('message', (message) => {
         const data = JSON.parse(message);
@@ -37,8 +40,8 @@ server.on('connection', (ws) => {
                 // 새로운 HumanPlayer 생성
                 const humanPlayer = new HumanPlayer(
                     playerId,
-                    game.mapSize.width / 2,  // 중앙 x
-                    game.mapSize.height / 2, // 중앙 y
+                    Math.random() * game.mapSize.width, // 랜덤 위치 x
+                    Math.random() * game.mapSize.height, // 랜덤 위치 y
                     data.nickname
                 );
                 game.players.set(playerId, humanPlayer);
@@ -65,7 +68,6 @@ server.on('connection', (ws) => {
 
     ws.on('close', () => {
         game.removePlayer(playerId);
-        console.log('플레이어 연결 종료:', playerId);  // 로그 추가
         broadcastGameState();  // 플레이어 퇴장 시에도 상태 브로드캐스트
     });
 }); 

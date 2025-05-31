@@ -4,27 +4,40 @@ class AIPlayer extends Player {
     constructor(id, x, y, name) {
         super(id, x, y, name);
         this.type = 'ai';
-        this.targetPosition = null;
-        this.moveInterval = 1000; // 1초마다 이동
-        this.lastMoveTime = Date.now();
+        this.targetX = x;
+        this.targetY = y;
+        this.targetUpdateInterval = 3000;  // 3초마다 새로운 목표 지점 설정
+        this.lastTargetUpdate = Date.now();
     }
 
     move() {
         const now = Date.now();
-        if (now - this.lastMoveTime < this.moveInterval) return;
+        
+        // 새로운 목표 지점 설정
+        if (now - this.lastTargetUpdate >= this.targetUpdateInterval) {
+            this.targetX = Math.random() * this.mapSize.width;
+            this.targetY = Math.random() * this.mapSize.height;
+            this.lastTargetUpdate = now;
+        }
 
-        // 랜덤 이동
-        const angle = Math.random() * Math.PI * 2;
-        const newX = this.x + Math.cos(angle) * this.speed;
-        const newY = this.y + Math.sin(angle) * this.speed;
+        // 현재 위치에서 목표 지점까지의 방향 계산
+        const dx = this.targetX - this.x;
+        const dy = this.targetY - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
 
-        this.x = newX;
-        this.y = newY;
-        this.lastMoveTime = now;
+        // 목표 지점에 충분히 가까우면 이동 중단
+        if (distance < this.speed) {
+            return;
+        }
+
+        // 정규화된 방향으로 이동
+        this.x += (dx / distance) * this.speed;
+        this.y += (dy / distance) * this.speed;
     }
 
     setTarget(position) {
-        this.targetPosition = position;
+        this.targetX = position.x;
+        this.targetY = position.y;
     }
 }
 

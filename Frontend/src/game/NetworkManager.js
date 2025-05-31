@@ -36,14 +36,6 @@ export class NetworkManager {
                     break;
             }
         };
-
-        this.ws.onclose = () => {
-            console.log('서버와 연결이 끊어졌습니다.');
-        };
-
-        this.ws.onerror = (error) => {
-            console.error('WebSocket 에러:', error);
-        };
     }
 
     sendMove(position) {

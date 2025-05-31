@@ -8,35 +8,27 @@ class Game {
             height: 1000
         };
         this.isRunning = false;
-        this.aiSpawnIntervalId = null;
+        this.nextAISpawn = 0;  // 다음 AI 스폰 시간
+        this.aiSpawnInterval = 10;  // 10초마다
     }
 
     start() {
         if (this.isRunning) return;
         this.isRunning = true;
-        // this.startAISpawning();
     }
 
     stop() {
         this.isRunning = false;
-        if (this.aiSpawnIntervalId) {
-            clearInterval(this.aiSpawnIntervalId);
-        }
-    }
-
-    startAISpawning() {
-        this.aiSpawnIntervalId = setInterval(() => {
-            this.spawnAIPlayer();
-        }, 10000); // 10초
     }
 
     spawnAIPlayer() {
-        const id = `ai-${Date.now()}`;
+        const id = `AI-${Date.now()}`;
         const x = Math.random() * this.mapSize.width;
         const y = Math.random() * this.mapSize.height;
-        const name = `AI-${id}`;
+        const name = `${id}`;
 
         const aiPlayer = new AIPlayer(id, x, y, name);
+        aiPlayer.mapSize = this.mapSize;  // 맵 크기 전달
         this.players.set(id, aiPlayer);
         
         return aiPlayer;
@@ -51,12 +43,20 @@ class Game {
     }
 
     update() {
-        // AI 플레이어들의 움직임 업데이트
-        for (const [id, player] of this.players) {
-            if (player instanceof AIPlayer) {
+        const currentTime = Math.floor(Date.now() / 1000);  // 현재 시간(초)
+        
+        // AI 스폰 체크 (더 간단하게)
+        if (currentTime >= this.nextAISpawn) {
+            this.spawnAIPlayer();
+            this.nextAISpawn = currentTime + this.aiSpawnInterval;
+        }
+
+        // AI 플레이어들 업데이트
+        this.players.forEach(player => {
+            if (player.type === 'ai') {
                 player.move();
             }
-        }
+        });
     }
 }
 
