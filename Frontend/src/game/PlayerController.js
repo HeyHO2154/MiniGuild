@@ -32,9 +32,6 @@ export class PlayerController {
     }
 
     update() {
-        const player = this.game.players.get(this.game.playerId);
-        if (!player) return;
-
         let dx = 0;
         let dy = 0;
 
@@ -50,23 +47,30 @@ export class PlayerController {
         }
 
         if (dx !== 0 || dy !== 0) {
-            // 새로운 위치 계산
-            const newX = player.x + dx * this.moveSpeed;
-            const newY = player.y + dy * this.moveSpeed;
+            // 새로운 카메라 위치 계산
+            const newCameraX = this.game.camera.x + dx * this.moveSpeed;
+            const newCameraY = this.game.camera.y + dy * this.moveSpeed;
 
-            // 맵 경계 체크 (플레이어 크기 20 고려)
-            const mapSize = this.game.mapSize;
-            const boundedX = Math.max(20, Math.min(mapSize.width - 20, newX));
-            const boundedY = Math.max(20, Math.min(mapSize.height - 20, newY));
+            // 플레이어의 새로운 월드 좌표 계산
+            const newPlayerX = newCameraX + window.innerWidth / 2;
+            const newPlayerY = newCameraY + window.innerHeight / 2;
 
-            // 로컬 업데이트
-            player.x = boundedX;
-            player.y = boundedY;
+            // 플레이어가 맵 경계 내에 있는지 확인
+            const isValidX = newPlayerX >= 0 && newPlayerX <= this.game.mapSize.width;
+            const isValidY = newPlayerY >= 0 && newPlayerY <= this.game.mapSize.height;
 
-            // 서버에 전송 (경계 내의 위치만)
+            // 유효한 방향으로만 이동
+            if (isValidX) this.game.camera.x = newCameraX;
+            if (isValidY) this.game.camera.y = newCameraY;
+
+            // 최종 플레이어 위치 계산
+            const playerWorldX = this.game.camera.x + window.innerWidth / 2;
+            const playerWorldY = this.game.camera.y + window.innerHeight / 2;
+
+            // 서버에 실제 월드 좌표 전송
             this.game.networkManager.sendMove({
-                x: boundedX,
-                y: boundedY
+                x: playerWorldX,
+                y: playerWorldY
             });
         }
     }

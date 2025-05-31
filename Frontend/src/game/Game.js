@@ -53,15 +53,15 @@ export class Game {
             
             this.renderer.drawMap(this.camera, this.mapSize);
             
+            const myPlayer = this.players.get(this.playerId);
+            if (myPlayer) {
+                myPlayer.x = this.camera.x + window.innerWidth / 2;
+                myPlayer.y = this.camera.y + window.innerHeight / 2;
+            }
+            
             this.players.forEach(player => {
                 this.renderer.drawPlayer(player, this.camera);
             });
-
-            const player = this.players.get(this.playerId);
-            if (player) {
-                this.camera.x = player.x - window.innerWidth / 2;
-                this.camera.y = player.y - window.innerHeight / 2;
-            }
 
             requestAnimationFrame(gameLoop);
         };
