@@ -1,7 +1,24 @@
-cd Backend
+cd Backend:5000
 npm init -y  # package.json 생성
 npm install ws  # WebSocket 서버용
 
-cd Frontend
+빌드용
+npm install -D @vercel/ncc
+"build": "ncc build src/server.js -o dist" - package.json에 추가
+라즈베리파이
+sudo apt-get install -y nodejs
+node index.js
+
+----------------------------------------
+
+cd Frontend:3000
 npm init -y  # package.json 생성
 npm install express  # 정적 파일 서버용
+
+빌드용
+npm install -D vite
+"build": "vite build", - package.json에 추가
+라즈베리파이
+sudo apt-get install -y npm
+npm install -g serve
+serve -s .

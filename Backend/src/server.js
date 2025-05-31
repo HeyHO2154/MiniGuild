@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 const Game = require('./game/Game');
 const HumanPlayer = require('./game/entities/HumanPlayer');
 
-const server = new WebSocket.Server({ port: 8080 });
+const server = new WebSocket.Server({ port: 5000 });
 const game = new Game();
 
 // 게임 시작

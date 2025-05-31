@@ -13,7 +13,7 @@ export class NetworkManager {
     }
 
     connect(nickname) {
-        this.ws = new WebSocket('ws://localhost:8080');
+        this.ws = new WebSocket('ws://praven.kro.kr:5000');
         
         this.ws.onopen = () => {
             this.ws.send(JSON.stringify({

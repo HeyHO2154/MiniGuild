@@ -4,7 +4,8 @@
   "main": "src/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "build": "ncc build src/server.js -o dist"
   },
   "keywords": [],
   "author": "",
@@ -12,5 +13,8 @@
   "description": "",
   "dependencies": {
     "ws": "^8.18.2"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.3"
   }
 }
