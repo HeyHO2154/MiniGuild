@@ -4,8 +4,8 @@ class Game {
     constructor() {
         this.players = new Map();
         this.mapSize = {
-            width: 1000,
-            height: 1000
+            width: 2000,
+            height: 2000
         };
         this.isRunning = false;
         this.nextAISpawn = 0;  // 다음 AI 스폰 시간
@@ -25,7 +25,7 @@ class Game {
         const id = `AI-${Date.now()}`;
         const x = Math.random() * this.mapSize.width;
         const y = Math.random() * this.mapSize.height;
-        const name = `${id}`;
+        const name = `NPC`;
 
         const aiPlayer = new AIPlayer(id, x, y, name);
         aiPlayer.mapSize = this.mapSize;  // 맵 크기 전달
