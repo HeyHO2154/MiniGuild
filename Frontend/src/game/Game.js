@@ -25,7 +25,15 @@ export class Game {
     handleInit(data) {
         this.playerId = data.id;
         this.mapSize = data.mapSize;
-        this.players = new Map();
+        
+        // 플레이어 초기화
+        const myPlayerData = data.gameState.players.find(p => p.id === this.playerId);
+        if (myPlayerData) {
+            // 카메라 초기 위치 설정
+            this.camera.x = myPlayerData.x - window.innerWidth / 2;
+            this.camera.y = myPlayerData.y - window.innerHeight / 2;
+        }
+        
         this.updatePlayers(data.gameState.players);
         this.startGameLoop();
     }
