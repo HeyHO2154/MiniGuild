@@ -27,6 +27,7 @@ setInterval(broadcastGameState, 1000 / 60);  // 60fps
 
 server.on('connection', (ws) => {
     const playerId = Date.now().toString();
+    console.log('플레이어 연결:', playerId);
     
     ws.on('message', (message) => {
         const data = JSON.parse(message);
@@ -64,6 +65,7 @@ server.on('connection', (ws) => {
 
     ws.on('close', () => {
         game.removePlayer(playerId);
+        console.log('플레이어 연결 종료:', playerId);  // 로그 추가
         broadcastGameState();  // 플레이어 퇴장 시에도 상태 브로드캐스트
     });
 }); 

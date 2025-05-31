@@ -32,11 +32,7 @@ export class Game {
 
     handleGameState(data) {
         // 다른 플레이어들 정보 업데이트
-        data.players.forEach(playerData => {
-            if (playerData.id !== this.playerId) {  // 내 플레이어는 업데이트하지 않음
-                this.players.set(playerData.id, playerData);
-            }
-        });
+        this.updatePlayers(data.players);
     }
 
     handleLogin(nickname) {

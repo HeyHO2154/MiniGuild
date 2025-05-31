@@ -3,6 +3,13 @@ export class NetworkManager {
         this.handleInit = handleInit;
         this.handleGameState = handleGameState;
         this.ws = null;
+
+        // 페이지 종료 시 연결 종료
+        window.addEventListener('beforeunload', () => {
+            if (this.ws) {
+                this.ws.close();
+            }
+        });
     }
 
     connect(nickname) {
@@ -28,6 +35,14 @@ export class NetworkManager {
                     this.handleGameState(data);
                     break;
             }
+        };
+
+        this.ws.onclose = () => {
+            console.log('서버와 연결이 끊어졌습니다.');
+        };
+
+        this.ws.onerror = (error) => {
+            console.error('WebSocket 에러:', error);
         };
     }
 
