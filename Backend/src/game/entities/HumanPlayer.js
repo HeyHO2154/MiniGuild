@@ -4,6 +4,7 @@ class HumanPlayer extends Player {
     constructor(id, x, y, name) {
         super(id, x, y, name);
         this.type = 'human';
+        this.color = 'orange';
     }
 
     move(data) {
