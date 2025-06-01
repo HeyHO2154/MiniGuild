@@ -47,41 +47,25 @@ export class PlayerController {
         }
 
         if (dx !== 0 || dy !== 0) {
-            // 새로운 카메라 위치 계산
-            const newCameraX = this.game.camera.x + dx * this.moveSpeed;
-            const newCameraY = this.game.camera.y + dy * this.moveSpeed;
+            const myPlayer = this.game.players.get(this.game.playerId);
+            if (!myPlayer) return;
 
-            // 플레이어의 새로운 월드 좌표 계산
-            const newPlayerX = newCameraX + window.innerWidth / 2;
-            const newPlayerY = newCameraY + window.innerHeight / 2;
+            // 새로운 위치 계산
+            const newX = myPlayer.x + dx * this.moveSpeed;
+            const newY = myPlayer.y + dy * this.moveSpeed;
 
-            // 플레이어가 맵 경계 내에 있는지 확인
-            const isValidX = newPlayerX >= 0 && newPlayerX <= this.game.mapSize.width;
-            const isValidY = newPlayerY >= 0 && newPlayerY <= this.game.mapSize.height;
-
-            // 유효한 방향으로만 이동
-            if (isValidX) this.game.camera.x = newCameraX;
-            if (isValidY) this.game.camera.y = newCameraY;
-
-            // 최종 플레이어 위치 계산
-            const playerWorldX = this.game.camera.x + window.innerWidth / 2;
-            const playerWorldY = this.game.camera.y + window.innerHeight / 2;
-
-            // 서버에 실제 월드 좌표 전송
-            this.game.networkManager.sendMove({
-                x: playerWorldX,
-                y: playerWorldY
-            });
+            // 맵 경계 체크
+            if (newX >= 0 && newX <= this.game.mapSize.width &&
+                newY >= 0 && newY <= this.game.mapSize.height) {
+                // 서버에 새 위치 전송
+                this.sendPositionToServer(newX, newY);
+            }
         }
     }
 
-    // 위치 전송을 제한하는 메서드 추가
     sendPositionToServer(x, y) {
-        if (!this.lastSentTime || Date.now() - this.lastSentTime >= 50) {  // 50ms 마다 전송
-            this.game.networkManager.sendMove({
-                x: x,
-                y: y
-            });
+        if (!this.lastSentTime || Date.now() - this.lastSentTime >= 16) {
+            this.game.networkManager.sendMove({ x, y });
             this.lastSentTime = Date.now();
         }
     }

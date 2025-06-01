@@ -5,8 +5,7 @@ import { PlayerController } from './PlayerController.js';
 
 export class Game {
     constructor() {
-        this.camera = { x: 0, y: 0 };
-        this.renderer = new Renderer(document.getElementById('gameCanvas'), this.camera);
+        this.renderer = new Renderer(document.getElementById('gameCanvas'));
         this.networkManager = new NetworkManager(
             this.handleInit.bind(this),
             this.handleGameState.bind(this)
@@ -25,21 +24,11 @@ export class Game {
     handleInit(data) {
         this.playerId = data.id;
         this.mapSize = data.mapSize;
-        
-        // 플레이어 초기화
-        const myPlayerData = data.gameState.players.find(p => p.id === this.playerId);
-        if (myPlayerData) {
-            // 카메라 초기 위치 설정
-            this.camera.x = myPlayerData.x - window.innerWidth / 2;
-            this.camera.y = myPlayerData.y - window.innerHeight / 2;
-        }
-        
         this.updatePlayers(data.gameState.players);
         this.startGameLoop();
     }
 
     handleGameState(data) {
-        // 다른 플레이어들 정보 업데이트
         this.updatePlayers(data.players);
     }
 
@@ -59,17 +48,13 @@ export class Game {
             this.playerController.update();
             this.renderer.clear();
             
-            this.renderer.drawMap(this.camera, this.mapSize);
-            
             const myPlayer = this.players.get(this.playerId);
             if (myPlayer) {
-                myPlayer.x = this.camera.x + window.innerWidth / 2;
-                myPlayer.y = this.camera.y + window.innerHeight / 2;
+                this.renderer.drawMap(this.mapSize, myPlayer);
+                this.players.forEach(player => {
+                    this.renderer.drawPlayer(player, myPlayer);
+                });
             }
-            
-            this.players.forEach(player => {
-                this.renderer.drawPlayer(player, this.camera);
-            });
 
             requestAnimationFrame(gameLoop);
         };
