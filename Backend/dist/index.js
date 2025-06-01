@@ -5039,6 +5039,94 @@ module.exports = Game;
 
 /***/ }),
 
+/***/ 67:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+// NetworkManager.js - 웹소켓 통신 처리 담당
+const WebSocket = __nccwpck_require__(354);
+const HumanPlayer = __nccwpck_require__(74);
+
+class NetworkManager {
+    constructor(game) {
+        this.game = game;
+        this.server = new WebSocket.Server({ port: 5000 });
+        this.setupWebSocket();
+    }
+
+    setupWebSocket() {
+        this.server.on('connection', (ws) => {
+            const playerId = Date.now().toString();
+            
+            ws.on('message', (message) => {
+                const data = JSON.parse(message);
+                this.handleMessage(ws, playerId, data);
+            });
+
+            ws.on('close', () => {
+                this.game.removePlayer(playerId);
+                this.broadcastGameState();
+            });
+        });
+    }
+
+    handleMessage(ws, playerId, data) {
+        switch(data.type) {
+            case 'join':
+                const humanPlayer = new HumanPlayer(
+                    playerId,
+                    Math.random() * this.game.mapSize.width,
+                    Math.random() * this.game.mapSize.height,
+                    data.nickname
+                );
+                this.game.players.set(playerId, humanPlayer);
+
+                ws.send(JSON.stringify({
+                    type: 'init',
+                    id: playerId,
+                    mapSize: this.game.mapSize,
+                    gameState: {
+                        players: this.game.getAllPlayers()
+                    }
+                }));
+                break;
+
+            case 'move':
+                const player = this.game.players.get(playerId);
+                if (player) {
+                    player.move(data);
+                }
+                break;
+        }
+    }
+
+    broadcastGameState() {
+        const gameStateMessage = {
+            type: 'gameState',
+            players: this.game.getAllPlayers()
+        };
+        
+        this.server.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify(gameStateMessage));
+            }
+        });
+    }
+
+    startBroadcastLoop() {
+        // 게임 상태 브로드캐스트 (60fps)
+        const TICK_RATE = 60;
+        setInterval(() => {
+            this.game.update();  // AI 업데이트
+            this.broadcastGameState();  // 상태 브로드캐스트
+        }, 1000 / TICK_RATE);
+    }
+}
+
+module.exports = NetworkManager;
+
+
+/***/ }),
+
 /***/ 323:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -5098,6 +5186,7 @@ class HumanPlayer extends Player {
     constructor(id, x, y, name) {
         super(id, x, y, name);
         this.type = 'human';
+        this.color = 'orange';
     }
 
     move(data) {
@@ -5277,79 +5366,15 @@ module.exports = require("zlib");
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-const WebSocket = __nccwpck_require__(354);
 const Game = __nccwpck_require__(500);
-const HumanPlayer = __nccwpck_require__(74);
+const NetworkManager = __nccwpck_require__(67);
 
-const server = new WebSocket.Server({ port: 5000 });
 const game = new Game();
+const networkManager = new NetworkManager(game);
 
 // 게임 시작
 game.start();
-
-// 메인 게임 루프
-const TICK_RATE = 60;
-setInterval(() => {
-    game.update();  // AI 업데이트
-    broadcastGameState();  // 상태 브로드캐스트
-}, 1000 / TICK_RATE);  // 60fps
-
-// 게임 상태 브로드캐스트 함수
-function broadcastGameState() {
-    const gameStateMessage = {
-        type: 'gameState',
-        players: game.getAllPlayers()
-    };
-    
-    server.clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(gameStateMessage));
-        }
-    });
-}
-
-server.on('connection', (ws) => {
-    const playerId = Date.now().toString();
-    
-    ws.on('message', (message) => {
-        const data = JSON.parse(message);
-        
-        switch(data.type) {
-            case 'join':
-                // 새로운 HumanPlayer 생성
-                const humanPlayer = new HumanPlayer(
-                    playerId,
-                    Math.random() * game.mapSize.width, // 랜덤 위치 x
-                    Math.random() * game.mapSize.height, // 랜덤 위치 y
-                    data.nickname
-                );
-                game.players.set(playerId, humanPlayer);
-
-                // 초기 게임 상태 전송
-                ws.send(JSON.stringify({
-                    type: 'init',
-                    id: playerId,
-                    mapSize: game.mapSize,
-                    gameState: {
-                        players: game.getAllPlayers()
-                    }
-                }));
-                break;
-
-            case 'move':
-                const player = game.players.get(data.id);
-                if (player) {
-                    player.move(data);
-                }
-                break;
-        }
-    });
-
-    ws.on('close', () => {
-        game.removePlayer(playerId);
-        broadcastGameState();  // 플레이어 퇴장 시에도 상태 브로드캐스트
-    });
-}); 
+networkManager.startBroadcastLoop(); 
 module.exports = __webpack_exports__;
 /******/ })()
 ;
