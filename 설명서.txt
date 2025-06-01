@@ -22,3 +22,8 @@ npm install -D vite
 sudo apt-get install -y npm
 npm install -g serve
 serve -s .
+
+----------------------------------------
+
+DB는 SQLite 사용하면 user.db, item.db 등 로컬 파일로 생성되며, 
+.python으로 DB 서버 실행 가능
